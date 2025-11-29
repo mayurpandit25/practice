@@ -1,1 +1,1 @@
-echoo "hello jenkins-v4"
+echo "hello jenkins-v4"
