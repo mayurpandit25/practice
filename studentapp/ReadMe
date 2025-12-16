@@ -1,0 +1,37 @@
+DOCKERISE PROJECT- STUDENTAPP
+
+1.create a rds_database
+  1.database:-studentapp
+  2.user:-admin
+  3.password:-admin123
+
+2.create a instance
+1.apt install mysql-client -y
+2.systemctl start mysql
+2.mysql -u admin -h <mysql_endpoint> -p
+
+  USE studentapp;
+  CREATE TABLE students (
+  student_id INT NOT NULL AUTO_INCREMENT,
+  student_name VARCHAR(100),
+  student_addr VARCHAR(100),
+  student_age VARCHAR(3),
+  student_qual VARCHAR(20),
+  student_percent VARCHAR(10),
+  student_year_passed VARCHAR(10),
+  PRIMARY KEY (student_id)
+  );
+  EXIT;
+
+#Add the database endpoint in context.xml file
+
+#build the image
+docker build -t student-app .
+
+#run the container
+docker run -d -p 8080:8080 --name studentapp  student-app
+docker ps
+
+#Url
+< http://<public_ip>:8080/student/ >
+
