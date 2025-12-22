@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  mysql:
+    build: ./db
+    image: student-mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - student-net
+
+  studentapp:
+    build: ./app
+    image: student-app
+    container_name: studentapp
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - student-net
+
+networks:
+  student-net:
+    driver: bridge
+
