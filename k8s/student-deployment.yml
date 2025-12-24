@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: student-deploy
+  labels: 
+    app: student
+    env: devops
+  namespace: student
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: student
+  template: 
+    metadata: 
+      name: student-deploy
+      labels: 
+        app: student
+        env: devops
+    spec: 
+      containers: 
+      - name: student-container
+        image: mayurpandit25/student-app:latest
+        ports:
+        - name: student-port
+          containerPort: 8080
+
+

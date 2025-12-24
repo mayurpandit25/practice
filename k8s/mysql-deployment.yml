@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  namespace: student
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      name: mysql-pod
+      namespace: student
+      labels: 
+        app: mysql
+    spec:
+      containers:
+      - name: student-mysql
+        image: mayurpandit25/student-mysql:latest
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: admin
+        - name: MYSQL_USER
+          value: admin
+        - name: MYSQL_DATABASE
+          value: studentapp
+        - name: MYSQL_PASSWORD
+          value: admin
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pvc 
