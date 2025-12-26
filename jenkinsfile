@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER = "mayurpandit25"
+        APP_IMAGE = "student-app"
+        DB_IMAGE  = "student-mysql"
+        KUBE_NAMESPACE = "student"
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/mayurpandit25/practice.git'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                docker build -t $DOCKERHUB_USER/$APP_IMAGE:latest studentapp/app
+                docker build -t $DOCKERHUB_USER/$DB_IMAGE:latest studentapp/db
+                '''
+            }
+        }
+
+        stage('Push Images to DockerHub') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'dockerhub-credentials-id',
+                    variable: 'DOCKER_TOKEN'
+                )]) {
+                    sh '''
+                    echo $DOCKER_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin
+                    docker push $DOCKERHUB_USER/$APP_IMAGE:latest
+                    docker push $DOCKERHUB_USER/$DB_IMAGE:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(
+                    credentialsId: 'kubeconfig',
+                    variable: 'KUBECONFIG'
+                )]) {
+                    sh '''
+                    kubectl create namespace $KUBE_NAMESPACE || true
+
+                    kubectl apply -f k8s/mysql-pv.yml
+                    kubectl apply -f k8s/mysql-pvc.yml
+                    kubectl apply -f k8s/mysql-deployment.yml
+                    kubectl apply -f k8s/mysql-service.yml
+
+                    kubectl apply -f k8s/student-deployment.yml
+                    kubectl apply -f k8s/student-service.yml
+                    '''
+                }
+            }
+        }
+    }
+}
