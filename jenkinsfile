@@ -1,62 +1,58 @@
 pipeline {
-    agent any
+    agent any 
 
     environment {
         DOCKERHUB_USER = "mayurpandit25"
-        APP_IMAGE = "student-app"
-        DB_IMAGE  = "student-mysql"
+        APP_NAME = "student-app"
+        DB_NAME = "student-mysql"
         KUBE_NAMESPACE = "student"
+        DOCKER_CRED_ID  = "dockerhub-credentials-id"
+        KUBECONFIG_ID   = "kubeconfig"
     }
 
     stages {
 
-        stage('Checkout Code') {
+        stage (checkout code) {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/mayurpandit25/practice.git'
             }
         }
 
-        stage('Build Docker Images') {
+        stage (docker build) {
             steps {
                 sh '''
-                docker build -t $DOCKERHUB_USER/$APP_IMAGE:latest studentapp/app
-                docker build -t $DOCKERHUB_USER/$DB_IMAGE:latest studentapp/db
+                docker build -t $DOCKERHUB_USER/$APP_NAME:latest studentapp/app
+                docker build -t $DOCKERHUB_USER/$DB_NAME:latest studentapp/db
                 '''
             }
         }
 
-        stage('Push Images to DockerHub') {
+        stage (push images to dockerhub) {
             steps {
                 withCredentials([string(
-                    credentialsId: 'dockerhub-credentials-id',
+                    credentialsID: "${DOCKER_CRED_ID}",
                     variable: 'DOCKER_TOKEN'
                 )]) {
                     sh '''
                     echo $DOCKER_TOKEN | docker login -u $DOCKERHUB_USER --password-stdin
-                    docker push $DOCKERHUB_USER/$APP_IMAGE:latest
-                    docker push $DOCKERHUB_USER/$DB_IMAGE:latest
+                    docker push $DOCKERHUB_USER/$APP_NAME:latest 
+                    docker push $DOCKERHUB_USER/$DB_NAME:latest
                     '''
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage (Deploy to kubernetes) {
             steps {
-                withCredentials([file(
-                    credentialsId: 'kubeconfig',
+                withCredentialsID([file(
+                    credentialsID: "${KUBECONFIG_ID}",
                     variable: 'KUBECONFIG'
                 )]) {
                     sh '''
-                    kubectl create namespace $KUBE_NAMESPACE || true
-
-                    kubectl apply -f k8s/mysql-pv.yml
-                    kubectl apply -f k8s/mysql-pvc.yml
-                    kubectl apply -f k8s/mysql-deployment.yml
-                    kubectl apply -f k8s/mysql-service.yml
-
-                    kubectl apply -f k8s/student-deployment.yml
-                    kubectl apply -f k8s/student-service.yml
+                    export KUBECONFIG=$KUBECONFIG
+                    kubectl create namespace $KUBE_NAMESPACE | true 
+                    kubectl apply -f k8s/.
                     '''
                 }
             }
