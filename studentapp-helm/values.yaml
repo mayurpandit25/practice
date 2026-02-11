@@ -1,0 +1,15 @@
+studentapp:
+  image: mayurpandit25/student-app
+  tag: latest
+  replicas: 1
+  port: 8080
+
+mysql: 
+  image: mayurpandit25/student-mysql
+  tag: latest 
+  port: 3306
+  database: studentapp
+  user: admin
+  password: admin
+  rootPassword: admin
+  pvcSize: 5Gi

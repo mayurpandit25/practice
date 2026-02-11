@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: studentapp
+spec:
+  replicas: {{ .Values.studentapp.replicas }}
+  selector:
+    matchLabels:
+      app: studentapp
+  template:
+    metadata:
+      labels:
+        app: studentapp
+    spec:
+      containers:
+      - name: studentapp
+        image: "{{ .Values.studentapp.image }}:{{ .Values.studentapp.tag }}"
+        ports:
+        - containerPort: {{ .Values.studentapp.port }}
