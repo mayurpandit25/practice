@@ -12,3 +12,12 @@ important
 hello mayur
 
 hey mayur
+<<<<<<< HEAD
+=======
+
+
+mobile
+
+mobile-1
+
+laptop-1
