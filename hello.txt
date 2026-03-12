@@ -10,5 +10,3 @@ commit-2
 important
 
 hello mayur
-
-hey mayur
